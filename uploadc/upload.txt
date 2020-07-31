@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="StyleSheet" href="index.css">
+        <meta charset="utf-8">
+        <title>Upload</title>
+    </head>
+    <body>
+        <h1>subir</h1>
+        <form action="upload.php" method="POST" enctype="multipart/form-data">
+            <textarea name="comentarios" rows="10" cols="40"></textarea>
+            <p>Subir imagen </p>
+            <input class="button" type="file" name="img" multiple="">
+            <input class="button" type="submit" name="enviar" value="subir">
+        </form>
+
+        <?php
+
+session_start();
+
+if(!isset($_SESSION["user"])){
+    
+    header("location:/proyecto/login/login.php");
+
+}
+?>
+
+
+<?php
+
+require("parametros.php");
+
+$id=0;
+
+if(isset($_POST["enviar"])){
+
+    $texto=$_POST["comentarios"];
+    
+    $nombre_img=$_FILES["img"]["name"];
+
+    $tipo_img=$_FILES["img"]["type"];
+
+    $tamaño= $_FILES["img"]["size"];
+    
+
+    if($tamaño<=2999999){
+
+        if($tipo_img="image/jpeg" || $tipo_img="image/png" || $tipo_img="image/jpg" || $tipo_img="image/gif" ){
+        
+            $destino=$_SERVER["DOCUMENT_ROOT"] . "/Img_Server/";
+    
+            move_uploaded_file($_FILES["img"]["tmp_name"],$destino.$nombre_img);
+            
+            try{ 
+    
+                $conexion = mysqli_connect($host,$user,$con,$bd) or die("Error host");
+    
+                $id=rand(10000,100000);
+    
+                $consulta= "INSERT INTO revisiones VALUES($id,'$texto','$nombre_img')";
+    
+                $query=mysqli_query($conexion,$consulta);
+    
+                echo "La id es : " . $id;  
+                
+                mysqli_close($conexion);
+            
+            }catch(exception $e){
+    
+                echo "Error en Mysql";
+        
+                mysqli_close();
+            }
+    
+        }else{
+    
+            echo "limite de tamano 3M";
+    
+            echo "Solo se pueden subir imagenes formato png, jpeg, jpg , gif";
+        }
+
+    }else{
+        echo "Maximo archivo 3 m";
+    }
+    
+
+}
+
+?>
+        
+    </body>
+</html>
